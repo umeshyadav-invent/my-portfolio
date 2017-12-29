@@ -1,4 +1,3 @@
-
 import boto3
 from botocore.client import Config
 import StringIO
@@ -7,23 +6,34 @@ import mimetypes
 
 def lambda_handler(event, context):
     # TODO implement
-    s3 = boto3.resource('s3', config=Config(signature_version='s3v4'))
+    sns = boto3.resource('sns')
+    topic = sns.Topic('arn:aws:sns:us-east-1:533035462457:deployBigTrainBuild')
 
-    portfolio_bucket = s3.Bucket('bigtrain.dmf-nonprod.collegeboard.org')
-    build_bucket = s3.Bucket('bigtrainbuild.dmf-nonprod.collegeboard.org')
+    try:
+        s3 = boto3.resource('s3', config=Config(signature_version='s3v4'))
 
-    portfolio_zip = StringIO.StringIO()
-    build_bucket.download_fileobj('bigtrainbuild.zip',portfolio_zip)
+        portfolio_bucket = s3.Bucket('bigtrain.dmf-nonprod.collegeboard.org')
+        build_bucket = s3.Bucket('bigtrainbuild.dmf-nonprod.collegeboard.org')
 
-    with zipfile.ZipFile(portfolio_zip) as myzip:
-        for nm in myzip.namelist():
-            obj = myzip.open(nm)
-            portfolio_bucket.upload_fileobj(obj,nm,
-                ExtraArgs={'ContentType': mimetypes.guess_type(nm)[0]})
-            portfolio_bucket.Object(nm).Acl().put(ACL='public-read')
+        portfolio_zip = StringIO.StringIO()
+        build_bucket.download_fileobj('bigtrainbuild.zip',portfolio_zip)
 
-    print "Job Done!!"
+        with zipfile.ZipFile(portfolio_zip) as myzip:
+            for nm in myzip.namelist():
+                obj = myzip.open(nm)
+                portfolio_bucket.upload_fileobj(obj,nm,
+                    ExtraArgs={'ContentType': mimetypes.guess_type(nm)[0]})
+                portfolio_bucket.Object(nm).Acl().put(ACL='public-read')
+
+        print "Job Done!!"
+        topic.publish(Subject="Portfolio Deployed", Message="Portfolio Deployed Successfully!!")
+
+    except:
+        topic.publish(Subject="Portfolio Deployed Failed", Message="Portfolio was not deployed successfully!!")
+        raise
+
     return 'Hello from Lambda'
+
 
 #### Without Lambda Code
 # import boto3
