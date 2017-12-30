@@ -8,13 +8,13 @@ import mimetypes
 def lambda_handler(event, context):
     # TODO implement
     sns = boto3.resource('sns')
-    topic = sns.Topic('arn:aws:sns:us-east-1:533035462457:deployBigTrainBuild')
+    topic = sns.Topic('arn:aws:sns:us-east-1:533035462457:portfolioSNSTopic')
 
     # Set the Default Value,
     # so that if the Lambda is not executed by CodePiipleine
     location = {
-        "bucketName" : 'bigtrainbuild.dmf-nonprod.collegeboard.org',
-        "objectKey" : 'bigtrainbuild.zip'
+        "bucketName" : 'portfoliobuild.dmf-nonprod.collegeboard.org',
+        "objectKey" : 'portfoliobuild.zip'
     }
 
     try:
@@ -32,7 +32,7 @@ def lambda_handler(event, context):
 
         s3 = boto3.resource('s3', config=Config(signature_version='s3v4'))
 
-        portfolio_bucket = s3.Bucket('bigtrain.dmf-nonprod.collegeboard.org')
+        portfolio_bucket = s3.Bucket('portfolio.dmf-nonprod.collegeboard.org')
         build_bucket = s3.Bucket(location["bucketName"])
 
         portfolio_zip = StringIO.StringIO()
@@ -76,11 +76,11 @@ def lambda_handler(event, context):
 #     try:
 #         s3 = boto3.resource('s3', config=Config(signature_version='s3v4'))
 #
-#         portfolio_bucket = s3.Bucket('bigtrain.dmf-nonprod.collegeboard.org')
-#         build_bucket = s3.Bucket('bigtrainbuild.dmf-nonprod.collegeboard.org')
+#         portfolio_bucket = s3.Bucket('portfolio.dmf-nonprod.collegeboard.org')
+#         build_bucket = s3.Bucket('portfoliobuild.dmf-nonprod.collegeboard.org')
 #
 #         portfolio_zip = StringIO.StringIO()
-#         build_bucket.download_fileobj('bigtrainbuild.zip',portfolio_zip)
+#         build_bucket.download_fileobj('portfoliobuild.zip',portfolio_zip)
 #
 #         with zipfile.ZipFile(portfolio_zip) as myzip:
 #             for nm in myzip.namelist():
@@ -112,11 +112,11 @@ def lambda_handler(event, context):
 #
 # s3 = boto3.resource('s3', config=Config(signature_version='s3v4'))
 #
-# portfolio_bucket = s3.Bucket('bigtrain.dmf-nonprod.collegeboard.org')
-# build_bucket = s3.Bucket('bigtrainbuild.dmf-nonprod.collegeboard.org')
+# portfolio_bucket = s3.Bucket('portfolio.dmf-nonprod.collegeboard.org')
+# build_bucket = s3.Bucket('portfoliobuild.dmf-nonprod.collegeboard.org')
 #
 # portfolio_zip = StringIO.StringIO()
-# build_bucket.download_fileobj('bigtrainbuild.zip',portfolio_zip)
+# build_bucket.download_fileobj('portfoliobuild.zip',portfolio_zip)
 #
 # with zipfile.ZipFile(portfolio_zip) as myzip:
 #     for nm in myzip.namelist():
